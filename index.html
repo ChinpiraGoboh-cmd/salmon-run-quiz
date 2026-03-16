@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>あなたに合う武器はどれ？サモラン診断</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: #1a1a2e;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* インクしぶきの背景 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(ellipse 80px 60px at 10% 20%, #ff6b35 0%, transparent 70%),
+        radial-gradient(ellipse 60px 80px at 85% 10%, #00d4aa 0%, transparent 70%),
+        radial-gradient(ellipse 100px 40px at 50% 80%, #ffe000 0%, transparent 70%),
+        radial-gradient(ellipse 50px 70px at 90% 70%, #ff6b35 0%, transparent 70%),
+        radial-gradient(ellipse 70px 50px at 5% 90%, #00d4aa 0%, transparent 70%);
+      opacity: 0.15;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* タイトル画面 */
+    #screen-title {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .title-ink {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: #00d4aa;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.4;
+      background: linear-gradient(135deg, #ff6b35, #ffe000, #00d4aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 40px;
+    }
+
+    .ink-blob {
+      font-size: 80px;
+      margin-bottom: 32px;
+      animation: blob-float 3s ease-in-out infinite;
+    }
+
+    @keyframes blob-float {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
+    }
+
+    .start-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff6b35, #ff3d00);
+      color: #fff;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      padding: 18px 48px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(255, 107, 53, 0.5);
+      transition: transform 0.1s, box-shadow 0.1s;
+      letter-spacing: 2px;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(255, 107, 53, 0.6);
+    }
+
+    .start-btn:active {
+      transform: translateY(0);
+    }
+
+    /* 質問画面 */
+    #screen-question { display: none; }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b35, #ffe000);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    .question-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .badge-salmon {
+      background: rgba(255, 107, 53, 0.2);
+      color: #ff6b35;
+      border: 1px solid #ff6b35;
+    }
+
+    .badge-daily {
+      background: rgba(0, 212, 170, 0.2);
+      color: #00d4aa;
+      border: 1px solid #00d4aa;
+    }
+
+    .question-text {
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      color: #fff;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.15);
+      color: #fff;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .choice-btn:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: #ffe000;
+      transform: translateX(4px);
+    }
+
+    .choice-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 224, 0, 0.2);
+      color: #ffe000;
+      font-size: 14px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* 結果画面 */
+    #screen-result { display: none; text-align: center; }
+
+    .result-label {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: #ffe000;
+      margin-bottom: 12px;
+    }
+
+    .result-type {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ff6b35, #ffe000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .result-icon {
+      font-size: 80px;
+      margin: 24px 0;
+      animation: blob-float 3s ease-in-out infinite;
+    }
+
+    .result-desc {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #ddd;
+      background: rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: left;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #000;
+      color: #fff;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 8px;
+      transition: transform 0.1s, opacity 0.1s;
+    }
+
+    .share-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 14px 32px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 8px;
+      transition: transform 0.1s, background 0.1s;
+    }
+
+    .retry-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+    .result-score-detail {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+    }
+
+    .result-score-detail h3 {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .score-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .score-bar-label {
+      font-size: 12px;
+      color: #ccc;
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .score-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+
+    .score-bar-num {
+      font-size: 12px;
+      color: #aaa;
+      width: 20px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- タイトル画面 -->
+  <div id="screen-title">
+    <div class="title-ink">🦑 SALMON RUN 🐟</div>
+    <div class="ink-blob">🎮</div>
+    <h1>あなたに合う武器はどれ？<br>サモラン診断</h1>
+    <p class="subtitle">10問の質問に答えて、あなたに合う武器系統を診断！</p>
+    <button class="start-btn" onclick="startQuiz()">診断スタート！</button>
+  </div>
+
+  <!-- 質問画面 -->
+  <div id="screen-question">
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-text" id="progress-text">1 / 10</div>
+    </div>
+    <div class="question-text" id="question-text"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="screen-result">
+    <div class="result-label">あなたの武器タイプは…</div>
+    <div class="result-type" id="result-type"></div>
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-desc" id="result-desc"></div>
+    <div class="result-score-detail" id="score-detail"></div>
+    <br>
+    <button class="share-btn" onclick="shareX()">𝕏 でシェア</button>
+    <button class="retry-btn" onclick="retryQuiz()">🔄 もう一度診断する</button>
+  </div>
+
+</div>
+
+<script>
+  // ===== 武器系統データ =====
+  const weapons = {
+    shooter:  { name: 'シューター系',  icon: '🔫', color: '#4fc3f7', desc: 'あなたはシューター系！状況判断力に優れたオールラウンダーです。前線も後衛もこなせる柔軟さが武器。チームの中心として自然とみんなをまとめる頼れる存在です。サーモンランでも安定した立ち回りで仲間を支えます。' },
+    roller:   { name: 'ローラー系',    icon: '🎨', color: '#ff6b35', desc: 'あなたはローラー系！とにかく行動力と突破力が自慢の熱血タイプ。考えるより先に体が動く！ピンチでも真っ先に飛び込む勇気はチームの士気を上げます。たまには落ち着くことも大事かも？' },
+    charger:  { name: 'チャージャー系', icon: '🎯', color: '#ce93d8', desc: 'あなたはチャージャー系！慎重で計画的な分析派。じっくり状況を見極めてから動くタイプで、ミスが少なく信頼できます。遠くから全体を見渡す冷静さはチームにとって欠かせない存在です。' },
+    slosher:  { name: 'スロッシャー系', icon: '🪣', color: '#00d4aa', desc: 'あなたはスロッシャー系！状況への適応力が高い柔軟派。どんな場面でも自分なりのやり方を見つけてこなせるのが強み。チームの潤滑油的な存在で、気づいたら頼られていることが多いタイプです。' },
+    spinner:  { name: 'スピナー系',    icon: '⚙️', color: '#ffe000', desc: 'あなたはスピナー系！粘り強さと継続力が最大の武器。一度決めたことはやり遂げる根性があります。じっくり力を溜めて爆発するタイプで、長期戦になればなるほど真価を発揮します。' },
+    fude:     { name: 'フデ系',        icon: '🖌️', color: '#f48fb1', desc: 'あなたはフデ系！自由奔放でマイペースな個性派。ルールや常識にとらわれない独自の発想でみんなを驚かせます。予測不能な動きが時として最大の武器に。気分屋なところもご愛嬌！' },
+    shelter:  { name: 'シェルター系',  icon: '🛡️', color: '#80cbc4', desc: 'あなたはシェルター系！仲間思いで守備的な縁の下の力持ち。自分よりも仲間を優先する優しさが武器です。目立たないけれど、いなくなると途端に困る、チームに欠かせない存在です。' },
+  };
+
+  // ===== サモランQ =====
+  const salmonQs = [
+    {
+      q: '納品数が全然足りない！あなたはどう動く？',
+      choices: [
+        { text: '自分が率先して金イクラを拾いまくる', w: 'roller' },
+        { text: 'シャケを倒しまくって仲間が拾いやすくする', w: 'shooter' },
+        { text: 'デスしないように立ち回りを慎重にする', w: 'shelter' },
+        { text: '焦らず今できることを着実にこなす', w: 'spinner' },
+      ]
+    },
+    {
+      q: 'コウモリが遠くから攻撃してきた！どうする？',
+      choices: [
+        { text: '真っ先に自分が倒しに行く', w: 'roller' },
+        { text: '遠くから雨玉を打ち返して倒す', w: 'charger' },
+        { text: '仲間に任せて自分は別の敵を対処する', w: 'shooter' },
+        { text: '倒せなくてもとにかく雨玉だけは撃ち落とす', w: 'shelter' },
+      ]
+    },
+    {
+      q: 'バイトの中での自分の役割は？',
+      choices: [
+        { text: 'オオモノを積極的に倒しに行く', w: 'roller' },
+        { text: '納品を優先してイクラを稼ぐ', w: 'slosher' },
+        { text: '全体を見渡してカモンで状況を知らせる', w: 'charger' },
+        { text: '状況に応じてどこでもこなすオールラウンダー', w: 'shooter' },
+      ]
+    },
+    {
+      q: 'バイトをやるとき、何を考える？',
+      choices: [
+        { text: '支給武器でバイトするかどうか考える', w: 'charger' },
+        { text: 'ステージでやるかどうか考える', w: 'spinner' },
+        { text: '武器もステージも関係なくとにかくやる', w: 'roller' },
+        { text: '全然関係ないえっちなことを考える', w: 'fude' },
+      ]
+    },
+    {
+      q: '納品とシャケ退治、どちらを優先する？',
+      choices: [
+        { text: '常にシャケ退治を優先する', w: 'roller' },
+        { text: '常に納品を優先する', w: 'slosher' },
+        { text: '状況を見て使い分ける', w: 'shooter' },
+        { text: '仲間に合わせて動く', w: 'shelter' },
+      ]
+    },
+    {
+      q: 'サーモンランで一番気持ちいい瞬間は？',
+      choices: [
+        { text: 'オオモノの処理数を稼げたとき', w: 'roller' },
+        { text: '納品数を稼げたとき', w: 'slosher' },
+        { text: 'ゼロデスで終われたとき', w: 'shelter' },
+        { text: 'ギリギリでクリアしたとき', w: 'spinner' },
+      ]
+    },
+    {
+      q: '苦手なオオモノシャケは？',
+      choices: [
+        { text: 'カタパッド', w: 'charger' },
+        { text: 'テッキュウ', w: 'spinner' },
+        { text: 'ヘビ', w: 'fude' },
+        { text: 'テッパン', w: 'shooter' },
+      ]
+    },
+    {
+      q: 'クリアできなかったとき、どう感じる？',
+      choices: [
+        { text: '自分のプレイを振り返って反省する', w: 'charger' },
+        { text: '仲間のせいにしてしまう', w: 'spinner' },
+        { text: '気にせずすぐ次のバイトに切り替える', w: 'shooter' },
+        { text: '机にモンキーパンチをお見舞いする', w: 'roller' },
+      ]
+    },
+    {
+      q: '仲間が連続でデスしている！どうする？',
+      choices: [
+        { text: '自分が前に出てカバーする', w: 'roller' },
+        { text: '安全圏に戻るようカモンする', w: 'charger' },
+        { text: '自分はデスしないよう慎重に立ち回る', w: 'shelter' },
+        { text: '縁を切る', w: 'fude' },
+      ]
+    },
+    {
+      q: 'バイト終了後、真っ先に確認することは？',
+      choices: [
+        { text: '自分のオオモノ処理数', w: 'roller' },
+        { text: '自分の納品数', w: 'slosher' },
+        { text: '仲間のスコアと比べる', w: 'spinner' },
+        { text: '特に何も確認しない', w: 'fude' },
+      ]
+    },
+  ];
+
+  // ===== 日常Q =====
+  const dailyQs = [
+    {
+      q: '友達グループでの自分の役割は？',
+      choices: [
+        { text: '場を盛り上げるムードメーカー', w: 'slosher' },
+        { text: 'みんなをまとめるリーダー', w: 'shooter' },
+        { text: '聞き役・サポート役', w: 'shelter' },
+        { text: '自由にマイペースに動く', w: 'fude' },
+      ]
+    },
+    {
+      q: '苦手なことを頼まれた。どうする？',
+      choices: [
+        { text: '苦手でも全力でやってみる', w: 'shooter' },
+        { text: '得意な人に代わってもらう', w: 'slosher' },
+        { text: '苦手なりに自分なりのやり方で取り組む', w: 'spinner' },
+        { text: '断る', w: 'fude' },
+      ]
+    },
+    {
+      q: '新しいことに挑戦するとき、どんな気持ち？',
+      choices: [
+        { text: 'ワクワクして積極的に飛び込む', w: 'roller' },
+        { text: '慎重に準備してから始める', w: 'charger' },
+        { text: '不安だけどやってみる', w: 'spinner' },
+        { text: 'できるだけ避けたい', w: 'shelter' },
+      ]
+    },
+    {
+      q: '休日の過ごし方は？',
+      choices: [
+        { text: '友達と積極的に出かける', w: 'shooter' },
+        { text: '家でゆっくり過ごす', w: 'shelter' },
+        { text: '趣味に没頭する', w: 'spinner' },
+        { text: '特に何も決めずその日の気分で動く', w: 'fude' },
+      ]
+    },
+    {
+      q: '目標を達成するために大事にしていることは？',
+      choices: [
+        { text: '計画を立てて着実に進める', w: 'charger' },
+        { text: 'とにかく行動あるのみ', w: 'roller' },
+        { text: '仲間と協力して進める', w: 'shelter' },
+        { text: '楽しみながらマイペースに進める', w: 'fude' },
+      ]
+    },
+    {
+      q: '失敗したとき、どう立ち直る？',
+      choices: [
+        { text: '原因を分析して次に活かす', w: 'charger' },
+        { text: '気持ちを切り替えてすぐ前に進む', w: 'shooter' },
+        { text: '誰かに話を聞いてもらう', w: 'shelter' },
+        { text: '時間が解決してくれるのを待つ', w: 'spinner' },
+      ]
+    },
+    {
+      q: '好きな映画やドラマのジャンルは？',
+      choices: [
+        { text: 'アクション・バトル系', w: 'roller' },
+        { text: 'ミステリー・サスペンス系', w: 'charger' },
+        { text: 'ヒューマンドラマ・感動系', w: 'shelter' },
+        { text: 'コメディ・ギャグ系', w: 'fude' },
+      ]
+    },
+    {
+      q: '誰かと意見が対立したとき、どうする？',
+      choices: [
+        { text: '自分の意見をしっかり主張する', w: 'roller' },
+        { text: '面倒なので相手に合わせる', w: 'slosher' },
+        { text: '妥協点を探して折り合いをつける', w: 'shooter' },
+        { text: 'しばく', w: 'fude' },
+      ]
+    },
+    {
+      q: '朝起きたとき、まず何をする？',
+      choices: [
+        { text: 'すぐスマホをチェックする', w: 'shooter' },
+        { text: '顔を洗ってシャキッと目を覚ます', w: 'roller' },
+        { text: 'しばらくぼーっとする', w: 'spinner' },
+        { text: 'ギリギリまで二度寝する', w: 'fude' },
+      ]
+    },
+    {
+      q: '仲間が悩んでいる。どう接する？',
+      choices: [
+        { text: '積極的に話を聞いて一緒に解決策を考える', w: 'shooter' },
+        { text: 'そっと見守る', w: 'charger' },
+        { text: '励ましてとにかく元気づける', w: 'roller' },
+        { text: '自分の悩みも打ち明けて悩みマウントを取りに行く', w: 'fude' },
+      ]
+    },
+  ];
+
+  // ===== ゲームロジック =====
+  let questions = [];
+  let currentQ = 0;
+  let scores = {};
+
+  function shuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  function startQuiz() {
+    // スコアリセット
+    scores = {};
+    Object.keys(weapons).forEach(k => scores[k] = 0);
+
+    // ランダム5問ずつ選んで交互に並べる
+    const salmon = shuffle(salmonQs).slice(0, 5);
+    const daily  = shuffle(dailyQs).slice(0, 5);
+    questions = [];
+    for (let i = 0; i < 5; i++) {
+      questions.push({ ...salmon[i], type: 'salmon' });
+      questions.push({ ...daily[i],  type: 'daily' });
+    }
+    currentQ = 0;
+
+    document.getElementById('screen-title').style.display = 'none';
+    document.getElementById('screen-result').style.display = 'none';
+    document.getElementById('screen-question').style.display = 'block';
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = questions[currentQ];
+    const total = questions.length;
+
+    document.getElementById('progress-fill').style.width = (currentQ / total * 100) + '%';
+    document.getElementById('progress-text').textContent = `${currentQ + 1} / ${total}`;
+
+document.getElementById('question-text').textContent = q.q;
+
+    const labels = ['A', 'B', 'C', 'D'];
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    q.choices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = `<span class="choice-label">${labels[i]}</span>${c.text}`;
+      btn.onclick = () => answer(c.w);
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function answer(weaponKey) {
+    scores[weaponKey]++;
+    currentQ++;
+    if (currentQ < questions.length) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    document.getElementById('screen-question').style.display = 'none';
+    document.getElementById('screen-result').style.display = 'block';
+
+    // 最高スコアの武器
+    const top = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+    const w = weapons[top];
+
+    document.getElementById('result-type').textContent = w.name;
+    document.getElementById('result-icon').textContent = w.icon;
+    document.getElementById('result-desc').textContent = w.desc;
+
+    // スコア詳細
+    const total = questions.length;
+    const detail = document.getElementById('score-detail');
+    detail.innerHTML = '<h3>スコア内訳</h3>';
+    Object.entries(scores)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([key, val]) => {
+        const ww = weapons[key];
+        const pct = Math.round(val / total * 100);
+        detail.innerHTML += `
+          <div class="score-bar-row">
+            <div class="score-bar-label">${ww.icon} ${ww.name.replace('系','')}</div>
+            <div class="score-bar-bg">
+              <div class="score-bar-fill" style="width:${pct}%;background:${ww.color}"></div>
+            </div>
+            <div class="score-bar-num">${val}</div>
+          </div>`;
+      });
+  }
+
+  function shareX() {
+    const top = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+    const w = weapons[top];
+    const text = `🎮 サモラン武器診断の結果は...\n\n${w.icon} ${w.name} でした！\n\n#サモラン診断 #スプラトゥーン3`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  }
+
+  function retryQuiz() {
+    document.getElementById('screen-result').style.display = 'none';
+    document.getElementById('screen-title').style.display = 'block';
+  }
+</script>
+</body>
+</html>
