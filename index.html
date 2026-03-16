@@ -685,8 +685,9 @@ document.getElementById('question-text').textContent = q.q;
   function shareX() {
     const top = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
     const w = weapons[top];
+    const siteUrl = 'https://chinpiragoboh-cmd.github.io/salmon-run-quiz/';
     const text = `🎮 サモラン武器診断の結果は...\n\n${w.icon} ${w.name} でした！\n\n#サモラン診断 #スプラトゥーン3`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(siteUrl)}`;
     window.open(url, '_blank');
   }
 
