@@ -262,29 +262,23 @@
     }
 
     .share-btn {
-      display: -webkit-flex;
-      display: flex;
-      -webkit-justify-content: center;
-      justify-content: center;
-      -webkit-align-items: center;
+      display: inline-flex;
       align-items: center;
-      width: calc(100% - 16px);
-      margin: 8px auto;
+      gap: 8px;
       background: #000;
       color: #fff;
       font-family: 'Zen Maru Gothic', sans-serif;
       font-size: 16px;
       font-weight: 900;
       padding: 14px 32px;
-      border: none;
+      border: 2px solid rgba(255,255,255,0.2);
       border-radius: 50px;
       cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: transform 0.1s, opacity 0.1s;
+      margin: 8px;
+      transition: transform 0.1s, background 0.1s;
     }
 
-    .share-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+    .share-btn:hover { background: #222; transform: translateY(-2px); }
 
     .retry-btn {
       display: inline-flex;
