@@ -262,7 +262,12 @@
     }
 
     .share-btn {
-      display: block;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-justify-content: center;
+      justify-content: center;
+      -webkit-align-items: center;
+      align-items: center;
       width: calc(100% - 16px);
       margin: 8px auto;
       background: #000;
@@ -274,6 +279,8 @@
       border: none;
       border-radius: 50px;
       cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
       transition: transform 0.1s, opacity 0.1s;
     }
 
