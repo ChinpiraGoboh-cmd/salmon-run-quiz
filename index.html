@@ -200,6 +200,16 @@
       transform: translateX(4px);
     }
 
+    @media (hover: none) {
+      .choice-btn:hover {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.15);
+        transform: none;
+      }
+    }
+
+    .choice-btn:focus { outline: none; }
+
     .choice-label {
       display: inline-flex;
       align-items: center;
