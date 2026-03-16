@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>あなたに合う武器はどれ？サモラン診断</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
 
@@ -682,13 +683,31 @@ document.getElementById('question-text').textContent = q.q;
       });
   }
 
-  function shareX() {
+  async function shareX() {
     const top = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
     const w = weapons[top];
     const siteUrl = 'https://chinpiragoboh-cmd.github.io/salmon-run-quiz/';
-    const text = `🎮 サモラン武器診断の結果は...\n\n${w.icon} ${w.name} でした！\n\n#サモラン診断 #スプラトゥーン3`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(siteUrl)}`;
-    window.open(url, '_blank');
+    const shareText = `🎮 サモラン武器診断の結果は...\n\n${w.icon} ${w.name} でした！\n\n#サモラン診断 #スプラトゥーン3\n${siteUrl}`;
+
+    try {
+      const canvas = await html2canvas(document.getElementById('screen-result'), {
+        backgroundColor: '#1a1a2e',
+        scale: 2,
+        useCORS: true
+      });
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'salmon-run-result.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text: shareText });
+        } else {
+          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+          window.open(url, '_blank');
+        }
+      });
+    } catch (e) {
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+      window.open(url, '_blank');
+    }
   }
 
   function retryQuiz() {
